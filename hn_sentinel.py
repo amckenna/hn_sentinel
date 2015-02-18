@@ -46,7 +46,6 @@ def get_top_stories(start_date,end_date):
 	results = []
 	for e in q:
 		results.append((e[0],[e[1],e[2],e[3],e[4]]))
-	#print results
 	return results
 
 # 
@@ -56,15 +55,9 @@ def get_top_stories(start_date,end_date):
 # returns json
 def make_request(url):
 	try:
-		#sys.stdout.write('>')
-		sys.stdout.flush()
-		j = requests.get(url, timeout=5.0).json()
-		#sys.stdout.write('+')
-		sys.stdout.flush()
+		return requests.get(url, timeout=5.0).json()
 		return j
 	except:
-		sys.stdout.write('-')
-		sys.stdout.flush()
 		return ""
 
 # returns json
@@ -144,7 +137,6 @@ def init_db():
 @app.route("/u")
 def update_top_stories():
 	top_items_endpoint = "https://hacker-news.firebaseio.com/v0/topstories.json"
-	#print "starting story update"
 	top_items = make_request(top_items_endpoint)
 	top_stories = []
 	json_blobs = Queue.Queue()
@@ -166,10 +158,7 @@ def update_top_stories():
 				parsed_item = parse_item_details(json_blob)
 				top_stories.append((parsed_item["score"],parsed_item))
 				insert_record(parsed_item)
-				sys.stdout.write('.')
-				sys.stdout.flush()
 
-	#print "stories updated"
 	return "updated"
 
 @app.route("/date/<string:date>")
@@ -177,14 +166,10 @@ def past_stories(date=0,home=False):
 	if date != 0:
 		if home:
 			today_datetime = date
-			#print "today_datetime type",type(today_datetime)
 		else:
 			today_datetime = datetime.datetime.strptime(date,"%Y-%m-%d")
-			#print "today_datetime type",type(today_datetime)
 		today_epoch = format_from_date_time_to_epoch(today_datetime)
 		tomorrow_epoch = calculate_next_midnight_epoch(format_from_date_time_to_epoch(today_datetime))
-		#print "today epoch:",today_epoch
-		#print "tomorrow epoch:",tomorrow_epoch
 		today = format_from_epoch_to_date_time_string_short(today_epoch)
 		day_before = format_from_date_time_to_string_short(today_datetime - datetime.timedelta(days=1))
 		day_after = format_from_date_time_to_string_short(today_datetime + datetime.timedelta(days=1))
