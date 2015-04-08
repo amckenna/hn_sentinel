@@ -6,7 +6,6 @@ app = Flask(__name__)
 DATABASE = "database.db"
 
 # TODO: add functionality for daily, weekly, monthly, and yearly top posts
-# TODO: setup cron job to update every hour on the 30 minute mark
 
 #
 # database helper methods
@@ -33,19 +32,23 @@ def query_db(query, args=(), one=False):
     return (rv[0] if rv else None) if one else rv
 
 def insert_record(item_dict):
-	q = query_db("INSERT OR REPLACE INTO stories (story_id, time_posted, score, title, url, by) VALUES (?,?,?,?,?,?)", \
-				(item_dict["item_id"], item_dict["time"], item_dict["score"], item_dict["title"], item_dict["url"], item_dict["by"]))
-	if q:
+    q = query_db("INSERT OR REPLACE INTO stories (story_id, time_posted, score, title, url, by) VALUES (?,?,?,?,?,?)", \
+    			(item_dict["item_id"], item_dict["time"], item_dict["score"], item_dict["title"], item_dict["url"], item_dict["by"]))
+
+    q2 = query_db("INSERT OR REPLACE INTO comment_count (story_id, comment_count) VALUES (?,?)", \
+                (item_dict["item_id"], item_dict["comments"]))
+    if q and q2:
 		return True
-	else:
-		return False
+    else:
+        return False
 
 # returns array of (score, details) tuples
 def get_top_stories(start_date,end_date):
-	q = query_db("SELECT score, time_posted, title, url, story_id FROM stories WHERE time_posted > ? AND time_posted < ?", (start_date,end_date))
+	q = query_db("SELECT score, time_posted, title, url, story_id, comment_count FROM stories NATURAL JOIN comment_count WHERE time_posted > ? AND time_posted < ?", (start_date,end_date))
 	results = []
 	for e in q:
-		results.append((e[0],[e[1],e[2],e[3],e[4]]))
+		results.append((e[0],[e[1],e[2],e[3],e[4],e[5]]))
+		#results.append({'score':e[0],})
 	return results
 
 # 
@@ -67,16 +70,17 @@ def get_item(id, q):
 
 # returns dict
 def parse_item_details(item_json):
-	item_id = item_json["id"]
-	title = item_json["title"]
-	url = item_json["url"]
-	post_type = item_json["type"]
-	score = item_json["score"]
-	by = item_json["by"]
-	time = item_json["time"]
-	return {'item_id': item_id, 'title': title, 'url': url, 'post_type': post_type, 'score': score, 'by': by, 'time': time}
+    item_id = item_json["id"]
+    title = item_json["title"]
+    url = item_json["url"]
+    post_type = item_json["type"]
+    score = item_json["score"]
+    by = item_json["by"]
+    time = item_json["time"]
+    comments = item_json["descendants"]
+    return {'item_id': item_id, 'title': title, 'url': url, 'post_type': post_type, 'score': score, 'by': by, 'time': time, 'comments': comments}
 
-# returns an array of tuples with story details (score,[date_posted, title, link, id, time_since_posted])
+# returns an array of tuples with story details (score,[date_posted, title, link, id, time_since_posted, comment_count])
 def format_for_rendering(top_stories,posts_to_return=30):
 	top_stories.sort(key=itemgetter(0), reverse=True)
 	top_stories = top_stories[0:posts_to_return]
@@ -128,10 +132,15 @@ def calculate_next_midnight_epoch(epoch_time):
 #
 
 # remove for production
-@app.route('/i')
-def init_db():
-	q = query_db("CREATE TABLE stories (story_id INTEGER PRIMARY KEY, time_posted INTEGER, score INTEGER, title VARCHAR, url VARCHAR, by VARCHAR)", [], one=True)
-	return "db created"
+#@app.route('/i')
+#def init_db():
+#	q = query_db("CREATE TABLE stories (story_id INTEGER PRIMARY KEY, time_posted INTEGER, score INTEGER, title VARCHAR, url VARCHAR, by VARCHAR)", [], one=True)
+#	return "db created"
+
+@app.route('/a')
+def add_comments():
+    q = query_db("CREATE TABLE comment_count (story_id INTEGER PRIMARY KEY, comment_count INTEGER)", [], one=True)
+    return "table added"
 
 # updates the story database
 @app.route("/u")
