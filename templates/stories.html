@@ -11,7 +11,13 @@
         <div id="stories">
         {% for story in top_stories %}
         	<p><strong><a href="{{ story['url'] }}">{{ story['title'] }}</a></strong></br>
-            <span class="story_details">{{ story['score'] }} | <a href="https://news.ycombinator.com/item?id={{ story['story_id'] }}">comments ({{ story['comment_count'] }})</a> | {{ story['time_since'] }} | {{ story['url'].split("/")[2].strip("www.") }}</span></p>
+            <span class="story_details">{{ story['score'] }} | <a href="https://news.ycombinator.com/item?id={{ story['story_id'] }}">
+                {% if story['comment_count'] %}
+                    comments ({{ story['comment_count'] }})
+                {% else %}
+                    comments
+                {% endif %}
+            </a> | {{ story['time_since'] }} | {{ story['url'].split("/")[2].strip("www.") }}</span></p>
         {% endfor %} 
         </div>
   </div>

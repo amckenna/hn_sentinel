@@ -45,7 +45,7 @@ def insert_record(item_dict):
 
 # returns array of (score, details) tuples
 def get_top_stories(start_date,end_date):
-	q = query_db("SELECT score, time_posted, title, url, story_id, comment_count FROM stories NATURAL JOIN comment_count WHERE time_posted > ? AND time_posted < ?", (start_date,end_date))
+	q = query_db("SELECT score, time_posted, title, url, story_id, comment_count FROM stories NATURAL LEFT OUTER JOIN comment_count WHERE time_posted > ? AND time_posted < ?", (start_date,end_date))
 	results = []
 	for e in q:
 		results.append({'score':e[0],'time_posted':format_from_epoch_to_date_time_string(e[1]),'title':e[2],'url':e[3],'story_id':e[4],'comment_count':e[5],'time_since':'%sh %sm ago' % calculate_time_from_now(e[1])})
@@ -162,7 +162,7 @@ def update_top_stories():
 				parsed_item = parse_item_details(json_blob)
 				top_stories.append((parsed_item["score"],parsed_item))
 				insert_record(parsed_item)
-				
+
 	return "updated"
 
 @app.route("/date/<string:date>")
