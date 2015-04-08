@@ -10,8 +10,8 @@
         </div>
         <div id="stories">
         {% for story in top_stories %}
-        	<p><strong><a href="{{ story[1][2] }}">{{ story[1][1] }}</a></strong></br>
-            <span class="story_details">{{ story[0] }} | <a href="https://news.ycombinator.com/item?id={{ story[1][3] }}">comments ({{ story[1][4] }})</a> | {{ story[1][5] }} | {{ story[1][2].split("/")[2].strip("www.") }}</span></p>
+        	<p><strong><a href="{{ story['url'] }}">{{ story['title'] }}</a></strong></br>
+            <span class="story_details">{{ story['score'] }} | <a href="https://news.ycombinator.com/item?id={{ story['story_id'] }}">comments ({{ story['comment_count'] }})</a> | {{ story['time_since'] }} | {{ story['url'].split("/")[2].strip("www.") }}</span></p>
         {% endfor %} 
         </div>
   </div>

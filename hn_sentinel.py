@@ -6,6 +6,7 @@ app = Flask(__name__)
 DATABASE = "database.db"
 
 # TODO: add functionality for daily, weekly, monthly, and yearly top posts
+# TODO: feeling lucky button
 
 #
 # database helper methods
@@ -47,8 +48,7 @@ def get_top_stories(start_date,end_date):
 	q = query_db("SELECT score, time_posted, title, url, story_id, comment_count FROM stories NATURAL JOIN comment_count WHERE time_posted > ? AND time_posted < ?", (start_date,end_date))
 	results = []
 	for e in q:
-		results.append((e[0],[e[1],e[2],e[3],e[4],e[5]]))
-		#results.append({'score':e[0],})
+		results.append({'score':e[0],'time_posted':format_from_epoch_to_date_time_string(e[1]),'title':e[2],'url':e[3],'story_id':e[4],'comment_count':e[5],'time_since':'%sh %sm ago' % calculate_time_from_now(e[1])})
 	return results
 
 # 
@@ -80,14 +80,9 @@ def parse_item_details(item_json):
     comments = item_json["descendants"]
     return {'item_id': item_id, 'title': title, 'url': url, 'post_type': post_type, 'score': score, 'by': by, 'time': time, 'comments': comments}
 
-# returns an array of tuples with story details (score,[date_posted, title, link, id, time_since_posted, comment_count])
-def format_for_rendering(top_stories,posts_to_return=30):
-	top_stories.sort(key=itemgetter(0), reverse=True)
+def trim_stories(top_stories,posts_to_return=30):
+	top_stories.sort(key=itemgetter('score'), reverse=True)
 	top_stories = top_stories[0:posts_to_return]
-	for story in top_stories:
-		epoch_time = story[1][0]
-		story[1][0] = format_from_epoch_to_date_time_string(epoch_time)
-		story[1].append("%sh %sm ago" % calculate_time_from_now(epoch_time))
 	return top_stories
 
 # returns string
@@ -167,7 +162,7 @@ def update_top_stories():
 				parsed_item = parse_item_details(json_blob)
 				top_stories.append((parsed_item["score"],parsed_item))
 				insert_record(parsed_item)
-
+				
 	return "updated"
 
 @app.route("/date/<string:date>")
@@ -183,7 +178,7 @@ def past_stories(date=0,home=False):
 		day_before = format_from_date_time_to_string_short(today_datetime - datetime.timedelta(days=1))
 		day_after = format_from_date_time_to_string_short(today_datetime + datetime.timedelta(days=1))
 		top_stories = get_top_stories(today_epoch, tomorrow_epoch)
-		top_stories = format_for_rendering(top_stories,50)
+		top_stories = trim_stories(top_stories,50)
 		if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
 			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today))
 		else:
