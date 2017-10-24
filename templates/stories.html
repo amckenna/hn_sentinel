@@ -17,7 +17,7 @@
                 {% else %}
                     comments
                 {% endif %}
-            </a> | {{ story['time_since'] }} | {{ story['url'].split("/")[2].strip("www.") }}</span></p>
+            </a> | {{ story['time_since'] }} | {{ story['url'].split("/")[2].replace("www.","") }}</span></p>
         {% endfor %} 
         </div>
   </div>
