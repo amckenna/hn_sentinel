@@ -1,4 +1,4 @@
-import requests, json, sys, time, sqlite3, time, datetime, threading, Queue
+import requests, json, sys, time, sqlite3, time, datetime, calendar, threading, Queue
 from operator import itemgetter
 from flask import Flask, request, g, make_response, render_template
 app = Flask(__name__)
@@ -127,12 +127,15 @@ def get_date_links():
 	date = datetime.datetime.date(datetime.datetime.now())
 	week_start 	= date - datetime.timedelta(days=date.weekday())
 	week_end 	= week_start + datetime.timedelta(days=6)
+	month_start = date.today().replace(day=1)
+	month_days 	= calendar.monthrange(int(date.today().strftime('%Y')),int(date.today().strftime('%m')))[1]
+	month_end 	= datetime.date(int(date.today().strftime('%Y')), int(date.today().strftime('%m')), month_days)
+
 	day_link 	= format_from_date_time_to_string_short(datetime.datetime.now())
 	week_link 	= "%s/%s" % (format_from_date_time_to_string_short(week_start),format_from_date_time_to_string_short(week_end))
-	#month_link = 
+	month_link 	= "%s/%s" % (format_from_date_time_to_string_short(month_start),format_from_date_time_to_string_short(month_end))
 	#year_link 	=
-	return day_link, week_link
-	#return day_link, week_link, month_link, year_link
+	return day_link, week_link, month_link
 
 #
 # Flask specific methods
@@ -184,7 +187,7 @@ def past_day(date=0,home=False):
 			today_datetime = date
 		else:
 			today_datetime = datetime.datetime.strptime(date,"%Y-%m-%d")
-		day_link, week_link = get_date_links()
+		day_link, week_link, month_link = get_date_links()
 		today_epoch = format_from_date_time_to_epoch(today_datetime)
 		tomorrow_epoch = calculate_next_midnight_epoch(format_from_date_time_to_epoch(today_datetime))
 		today = format_from_epoch_to_date_time_string_short(today_epoch)
@@ -193,9 +196,9 @@ def past_day(date=0,home=False):
 		top_stories = get_top_stories(today_epoch, tomorrow_epoch)
 		top_stories = trim_stories(top_stories,20)
 		if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_link=day_link,week_link=week_link,mode="daily"))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_link=day_link,week_link=week_link,month_link=month_link,mode="daily"))
 		else:
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,day_link=day_link,week_link=week_link,mode="daily"))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,day_link=day_link,week_link=week_link,month_link=month_link,mode="daily"))
 		return response
 	else:
 		return "error"
@@ -206,7 +209,7 @@ def past_week(date_start,date_end):
 		start_datetime 	= datetime.datetime.strptime(date_start,"%Y-%m-%d")
 		end_datetime 	= datetime.datetime.strptime(date_end,"%Y-%m-%d")
 		today 			= "%s to %s" % (date_start, date_end)
-		day_link, week_link = get_date_links()
+		day_link, week_link, month_link = get_date_links()
 		start_epoch = format_from_date_time_to_epoch(start_datetime)
 		end_epoch 	= calculate_next_midnight_epoch(format_from_date_time_to_epoch(end_datetime))
 		day_before	= format_from_date_time_to_string_short(start_datetime - datetime.timedelta(days=1))
@@ -218,7 +221,7 @@ def past_week(date_start,date_end):
 
 		top_stories = get_top_stories(start_epoch, end_epoch)
 		top_stories = trim_stories(top_stories,20)
-		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,day_link=day_link,week_link=week_link,mode="weekly"))
+		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,day_link=day_link,week_link=week_link,month_link=month_link,mode="weekly"))
 		return response
 	else:
 		return "error"
