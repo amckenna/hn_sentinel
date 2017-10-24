@@ -180,9 +180,9 @@ def past_day(date=0,home=False):
 		top_stories = get_top_stories(today_epoch, tomorrow_epoch)
 		top_stories = trim_stories(top_stories,20)
 		if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,mode="daily"))
 		else:
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,mode="daily"))
 		return response
 	else:
 		return "error"
@@ -200,15 +200,12 @@ def past_week(date_start,date_end):
 		week_before_start = format_from_date_time_to_string_short(start_datetime - datetime.timedelta(days=8))
 		week_after_start  = format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=1))
 		week_after_end	  = format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=8))
+		if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
+			week_after_start = False
 
 		top_stories = get_top_stories(start_epoch, end_epoch)
 		top_stories = trim_stories(top_stories,20)
-
-		#if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
-		#	response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today))
-		#else:
-			#response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after))
-		response = make_response(render_template("stories.html",top_stories=top_stories,day_before="day_before",today=today,day_after="day_after"))
+		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,mode="weekly"))
 		return response
 	else:
 		return "error"

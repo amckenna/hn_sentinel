@@ -2,11 +2,19 @@
 {% block content %}
   <div class="jumbo">
         <div id="title">
-	        <h3 id="back_button"><a href="/date/{{ day_before }}"><</a></h3>
-	        <h3 id="title_header">Top Posts from {{ today }}</h3>
-	        {% if day_after %}
-	        	<h3 id="forward_button"><a href="/date/{{ day_after }}">></a></h3>
-	        {% endif %}
+            {% if mode == 'daily' %}
+    	        <h3 id="back_button"><a href="/date/{{ day_before }}"><</a></h3>
+    	        <h3 id="title_header">Top Posts from {{ today }}</h3>
+    	        {% if day_after %}
+    	        	<h3 id="forward_button"><a href="/date/{{ day_after }}">></a></h3>
+    	        {% endif %}
+            {% elif mode == 'weekly' %}
+                <h3 id="back_button"><a href="/week/{{ week_before_start }}/{{ week_before_end }}"><</a></h3>
+                <h3 id="title_header">Top Posts from {{ today }}</h3>
+                {% if week_after_start %}
+                    <h3 id="forward_button"><a href="/week/{{ week_after_start }}/{{ week_after_end }}">></a></h3>
+                {% endif %}
+            {% endif %}
         </div>
         <div id="stories">
         {% for story in top_stories %}
