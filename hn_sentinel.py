@@ -125,16 +125,19 @@ def calculate_next_midnight_epoch(epoch_time):
 # returns current day, week range, month range, and year range
 def get_date_links():
 	date = datetime.datetime.date(datetime.datetime.now())
+	year = date.today().year
+	month = date.today().month
+	
 	week_start 	= date - datetime.timedelta(days=date.weekday())
 	week_end 	= week_start + datetime.timedelta(days=6)
 	month_start = date.today().replace(day=1)
-	month_days 	= calendar.monthrange(int(date.today().strftime('%Y')),int(date.today().strftime('%m')))[1]
-	month_end 	= datetime.date(int(date.today().strftime('%Y')), int(date.today().strftime('%m')), month_days)
+	month_end 	= datetime.date(year, month, calendar.monthrange(year, month)[1])
 
 	day_link 	= format_from_date_time_to_string_short(datetime.datetime.now())
 	week_link 	= "%s/%s" % (format_from_date_time_to_string_short(week_start),format_from_date_time_to_string_short(week_end))
 	month_link 	= "%s/%s" % (format_from_date_time_to_string_short(month_start),format_from_date_time_to_string_short(month_end))
 	#year_link 	=
+
 	return day_link, week_link, month_link
 
 #
