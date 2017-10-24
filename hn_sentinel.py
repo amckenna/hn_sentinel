@@ -180,8 +180,8 @@ def update_top_stories():
 
 	return "updated"
 
-@app.route("/day/<string:date>")
-def past_day(date=0,home=False):
+@app.route("/<string:mode>/<string:date>")
+def past_day(mode, date=0,home=False):
 	if date != 0:
 		if home:
 			today_datetime = date
@@ -196,15 +196,15 @@ def past_day(date=0,home=False):
 		top_stories = get_top_stories(today_epoch, tomorrow_epoch)
 		top_stories = trim_stories(top_stories,20)
 		if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_link=day_link,week_link=week_link,month_link=month_link,mode="daily"))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_link=day_link,week_link=week_link,month_link=month_link,mode=mode))
 		else:
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,day_link=day_link,week_link=week_link,month_link=month_link,mode="daily"))
+			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,day_link=day_link,week_link=week_link,month_link=month_link,mode=mode))
 		return response
 	else:
 		return "error"
 
-@app.route("/week/<string:date_start>/<string:date_end>")
-def past_week(date_start,date_end):
+@app.route("/<string:mode>/<string:date_start>/<string:date_end>")
+def past_week(mode, date_start, date_end):
 	if date_start != 0 and date_end != 0:
 		start_datetime 	= datetime.datetime.strptime(date_start,"%Y-%m-%d")
 		end_datetime 	= datetime.datetime.strptime(date_end,"%Y-%m-%d")
@@ -221,7 +221,7 @@ def past_week(date_start,date_end):
 
 		top_stories = get_top_stories(start_epoch, end_epoch)
 		top_stories = trim_stories(top_stories,20)
-		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,day_link=day_link,week_link=week_link,month_link=month_link,mode="weekly"))
+		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,day_link=day_link,week_link=week_link,month_link=month_link,mode=mode))
 		return response
 	else:
 		return "error"

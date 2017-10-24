@@ -2,13 +2,13 @@
 {% block content %}
   <div class="jumbo">
         <div id="title">
-            {% if mode == 'daily' %}
+            {% if mode == 'day' %}
     	        <h3 id="back_button"><a href="/day/{{ day_before }}"><</a></h3>
     	        <h3 id="title_header">Top Posts from {{ today }}</h3>
     	        {% if day_after %}
     	        	<h3 id="forward_button"><a href="/day/{{ day_after }}">></a></h3>
     	        {% endif %}
-            {% elif mode == 'weekly' %}
+            {% elif mode == 'week' %}
                 <h3 id="back_button"><a href="/week/{{ week_before_start }}/{{ week_before_end }}"><</a></h3>
                 <h3 id="title_header">Top Posts from {{ today }}</h3>
                 {% if week_after_start %}
