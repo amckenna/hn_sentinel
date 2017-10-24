@@ -3,10 +3,10 @@
   <div class="jumbo">
         <div id="title">
             {% if mode == 'daily' %}
-    	        <h3 id="back_button"><a href="/date/{{ day_before }}"><</a></h3>
+    	        <h3 id="back_button"><a href="/day/{{ day_before }}"><</a></h3>
     	        <h3 id="title_header">Top Posts from {{ today }}</h3>
     	        {% if day_after %}
-    	        	<h3 id="forward_button"><a href="/date/{{ day_after }}">></a></h3>
+    	        	<h3 id="forward_button"><a href="/day/{{ day_after }}">></a></h3>
     	        {% endif %}
             {% elif mode == 'weekly' %}
                 <h3 id="back_button"><a href="/week/{{ week_before_start }}/{{ week_before_end }}"><</a></h3>

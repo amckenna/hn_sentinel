@@ -180,7 +180,7 @@ def update_top_stories():
 
 	return "updated"
 
-@app.route("/date/<string:date>")
+@app.route("/day/<string:date>")
 def past_day(date=0,home=False):
 	if date != 0:
 		if home:
