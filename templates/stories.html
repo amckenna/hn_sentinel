@@ -2,22 +2,14 @@
 {% block content %}
   <div class="jumbo">
         <div id="title">
-            {% if mode == 'day' %}
-    	        <h3 id="back_button"><a href="/day/{{ day_before }}"><</a></h3>
-    	        <h3 id="title_header">Top Posts from {{ today }}</h3>
-    	        {% if day_after %}
-    	        	<h3 id="forward_button"><a href="/day/{{ day_after }}">></a></h3>
-    	        {% endif %}
-            {% elif mode == 'week' %}
-                <h3 id="back_button"><a href="/week/{{ week_before_start }}/{{ week_before_end }}"><</a></h3>
-                <h3 id="title_header">Top Posts from {{ today }}</h3>
-                {% if week_after_start %}
-                    <h3 id="forward_button"><a href="/week/{{ week_after_start }}/{{ week_after_end }}">></a></h3>
-                {% endif %}
+            <h3 id="back_button"><a href="/{{ context.mode }}/{{ context.back_button }}"><</a></h3>
+            <h3 id="title_header">Top Posts from {{ context.page_header }}</h3>
+            {% if context.forward_button %}
+                <h3 id="forward_button"><a href="/{{ context.mode }}/{{ context.forward_button }}">></a></h3>
             {% endif %}
         </div>
         <div id="stories">
-        {% for story in top_stories %}
+        {% for story in context.top_stories %}
         	<p><strong><a href="{{ story['url'] }}">{{ story['title'] }}</a></strong></br>
             <span class="story_details">{{ story['score'] }} | <a href="https://news.ycombinator.com/item?id={{ story['story_id'] }}">
                 {% if story['comment_count'] %}

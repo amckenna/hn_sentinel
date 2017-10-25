@@ -1,6 +1,6 @@
 import requests, json, sys, time, sqlite3, time, datetime, calendar, threading, Queue
 from operator import itemgetter
-from flask import Flask, request, g, make_response, render_template
+from flask import Flask, request, g, make_response, render_template, abort
 app = Flask(__name__)
 
 DATABASE = "database.db"
@@ -182,57 +182,75 @@ def update_top_stories():
 
 	return "updated"
 
-@app.route("/<string:mode>/<string:date>")
-def past_day(mode, date=0,home=False):
-	if date != 0:
-		if home:
-			today_datetime = date
-		else:
-			today_datetime = datetime.datetime.strptime(date,"%Y-%m-%d")
-		day_link, week_link, month_link, year_link = get_date_links()
-		today_epoch = format_from_date_time_to_epoch(today_datetime)
-		tomorrow_epoch = calculate_next_midnight_epoch(format_from_date_time_to_epoch(today_datetime))
-		today = format_from_epoch_to_date_time_string_short(today_epoch)
-		day_before = format_from_date_time_to_string_short(today_datetime - datetime.timedelta(days=1))
-		day_after = format_from_date_time_to_string_short(today_datetime + datetime.timedelta(days=1))
-		top_stories = get_top_stories(today_epoch, tomorrow_epoch)
-		top_stories = trim_stories(top_stories,20)
-		if home or format_from_date_time_to_string_short(today_datetime) == format_from_date_time_to_string_short(datetime.date.today()):
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_link=day_link,week_link=week_link,month_link=month_link,year_link=year_link,mode=mode))
-		else:
-			response = make_response(render_template("stories.html",top_stories=top_stories,day_before=day_before,today=today,day_after=day_after,day_link=day_link,week_link=week_link,month_link=month_link,mode=mode))
-		return response
-	else:
-		return "error"
-
+@app.route("/<string:mode>/<string:date_start>")
+@app.route("/<string:mode>/<string:date_start>/")
 @app.route("/<string:mode>/<string:date_start>/<string:date_end>")
-def past_week(mode, date_start, date_end):
+@app.route("/<string:mode>/<string:date_start>/<string:date_end>/")
+def stories_list(mode, date_start, date_end=0,home=False):
+	if mode == 'day': date_end = date_start
 	if date_start != 0 and date_end != 0:
 		start_datetime 	= datetime.datetime.strptime(date_start,"%Y-%m-%d")
 		end_datetime 	= datetime.datetime.strptime(date_end,"%Y-%m-%d")
-		today 			= "%s to %s" % (date_start, date_end)
-		day_link, week_link, month_link, year_link = get_date_links()
 		start_epoch = format_from_date_time_to_epoch(start_datetime)
 		end_epoch 	= calculate_next_midnight_epoch(format_from_date_time_to_epoch(end_datetime))
 		day_before	= format_from_date_time_to_string_short(start_datetime - datetime.timedelta(days=1))
-		week_before_start = format_from_date_time_to_string_short(start_datetime - datetime.timedelta(days=7))
-		week_after_start  = format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=1))
-		week_after_end	  = format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=7))
-		if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
-			week_after_start = False
+		day_after 	= format_from_date_time_to_string_short(start_datetime + datetime.timedelta(days=1))
+
+		if mode == 'day':
+			page_header = date_start
+			back_button = day_before
+			if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
+				forward_button = False
+			else:
+				forward_button = day_after
+
+		elif mode == 'week':
+			page_header = "%s to %s" % (date_start, date_end)
+			week_before_start 	= format_from_date_time_to_string_short(start_datetime - datetime.timedelta(days=7))
+			week_before_end 	= day_before
+			week_after_start 	= format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=1))
+			week_after_end		= format_from_date_time_to_string_short(end_datetime + datetime.timedelta(days=7))
+			back_button 		= "%s/%s" % (week_before_start, week_before_end)
+			if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
+				forward_button = False
+			else:
+				forward_button = "%s/%s" % (week_after_start, week_after_end)
+
+		elif mode == 'month':
+			return 'month'
+
+		elif mode == 'year':
+			return 'year'
+
+		else:
+			abort(404)
 
 		top_stories = get_top_stories(start_epoch, end_epoch)
 		top_stories = trim_stories(top_stories,20)
-		response = make_response(render_template("stories.html",top_stories=top_stories,week_before_start=week_before_start,week_before_end=day_before,today=today,week_after_start=week_after_start,week_after_end=week_after_end,day_link=day_link,week_link=week_link,month_link=month_link,year_link=year_link,mode=mode))
+		day_link, week_link, month_link, year_link = get_date_links()
+
+		context = {
+					'top_stories': top_stories,
+					'page_header': page_header,
+					'forward_button': forward_button,
+					'back_button': back_button,
+					'day_link': day_link,
+					'week_link': week_link,
+					'month_link': month_link,
+					'year_link': year_link,
+					'mode': mode,
+				}
+
+		response = make_response (render_template("stories.html",context=context))
 		return response
 	else:
-		return "error"
+		abort(404)
 
 
 # the main page
 @app.route("/")
 def index():
-	return past_day(datetime.date.today(),True)
+	return stories_list("day",datetime.date.today(),datetime.date.today(),True)
 
 
 if __name__ == "__main__":
