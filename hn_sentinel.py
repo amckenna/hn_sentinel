@@ -1,4 +1,5 @@
 import requests, json, sys, time, sqlite3, time, datetime, calendar, threading, Queue
+from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 from flask import Flask, request, g, make_response, render_template, abort
 app = Flask(__name__)
@@ -217,7 +218,16 @@ def stories_list(mode, date_start, date_end=0,home=False):
 				forward_button = "%s/%s" % (week_after_start, week_after_end)
 
 		elif mode == 'month':
-			return 'month'
+			page_header = start_datetime.strftime('%Y-%m')
+			month_before_start 	= (start_datetime - relativedelta(months=+1)).replace(day=1)
+			month_before_end 	= datetime.date(month_before_start.year, month_before_start.month, calendar.monthrange(month_before_start.year, month_before_start.month)[1])
+			month_after_start 	= (start_datetime + relativedelta(months=+1)).replace(day=1)
+			month_after_end 	= datetime.date(month_after_start.year, month_after_start.month, calendar.monthrange(month_after_start.year, month_after_start.month)[1])
+			back_button 		= "%s/%s" % (format_from_date_time_to_string_short(month_before_start), month_before_end)
+			if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
+				forward_button = False
+			else:
+				forward_button = "%s/%s" % (format_from_date_time_to_string_short(month_after_start), month_after_end)
 
 		elif mode == 'year':
 			return 'year'
