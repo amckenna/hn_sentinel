@@ -230,7 +230,16 @@ def stories_list(mode, date_start, date_end=0,home=False):
 				forward_button = "%s/%s" % (format_from_date_time_to_string_short(month_after_start), month_after_end)
 
 		elif mode == 'year':
-			return 'year'
+			page_header = start_datetime.year
+			year_before_start 	= datetime.date((start_datetime.year - 1), 1, 1)
+			year_before_end		= datetime.date((start_datetime.year - 1), 12, 31)
+			year_after_start 	= datetime.date((start_datetime.year + 1), 1, 1)
+			year_after_end 		= datetime.date((start_datetime.year + 1), 12, 31)
+			back_button			= "%s/%s" % (format_from_date_time_to_string_short(year_before_start), year_before_end)
+			if (end_datetime + datetime.timedelta(days=1)) > datetime.datetime.now():
+				forward_button = False
+			else:
+				forward_button = "%s/%s" % (format_from_date_time_to_string_short(year_after_start), year_after_end)
 
 		else:
 			abort(404)
