@@ -261,7 +261,7 @@ def stories_list(mode, date_start, date_end=0,home=False):
 				}
 
 		if home: 
-			context['page_header'] = "The Last ~24hrs"
+			context['page_header'] = "The Last 24-48hrs"
 			context['back_button'] = date_start
 
 		response = make_response (render_template("stories.html",context=context))
