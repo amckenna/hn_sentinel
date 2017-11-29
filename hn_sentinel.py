@@ -188,7 +188,7 @@ def update_top_stories():
 @app.route("/<string:mode>/<string:date_start>/<string:date_end>")
 @app.route("/<string:mode>/<string:date_start>/<string:date_end>/")
 def stories_list(mode, date_start, date_end=0,home=False):
-	if mode == 'day': date_end = date_start
+	if mode == 'day' and date_end == 0: date_end = date_start
 	if date_start != 0 and date_end != 0:
 		start_datetime 	= datetime.datetime.strptime(date_start,"%Y-%m-%d")
 		end_datetime 	= datetime.datetime.strptime(date_end,"%Y-%m-%d")
@@ -260,6 +260,10 @@ def stories_list(mode, date_start, date_end=0,home=False):
 					'mode': mode,
 				}
 
+		if home: 
+			context['page_header'] = "The Last ~24hrs"
+			context['back_button'] = date_start
+
 		response = make_response (render_template("stories.html",context=context))
 		return response
 	else:
@@ -269,8 +273,8 @@ def stories_list(mode, date_start, date_end=0,home=False):
 # the main page
 @app.route("/")
 def index():
-	return stories_list("day",datetime.date.today(),datetime.date.today(),True)
-
+	#return stories_list("day",str(datetime.date.today()),True)
+	return stories_list("day",format_from_date_time_to_string_short(datetime.datetime.today() - datetime.timedelta(days=1)),format_from_date_time_to_string_short(datetime.datetime.now()),True)
 
 if __name__ == "__main__":
 	app.run(debug=True)
