@@ -188,7 +188,9 @@ def update_top_stories():
 @app.route("/<string:mode>/<string:date_start>/<string:date_end>")
 @app.route("/<string:mode>/<string:date_start>/<string:date_end>/")
 def stories_list(mode, date_start, date_end=0,home=False):
-	if mode == 'day' and date_end == 0: date_end = date_start
+	if mode == 'day' and date_end == 0: 
+		date_end = date_start
+
 	if date_start != 0 and date_end != 0:
 		start_datetime 	= datetime.datetime.strptime(date_start,"%Y-%m-%d")
 		end_datetime 	= datetime.datetime.strptime(date_end,"%Y-%m-%d")
@@ -244,7 +246,13 @@ def stories_list(mode, date_start, date_end=0,home=False):
 		else:
 			abort(404)
 
-		top_stories = get_top_stories(start_epoch, end_epoch)
+		if home:
+			end_epoch = int(time.mktime(datetime.datetime.now().timetuple()))
+			start_epoch = end_epoch - 86400
+			top_stories = get_top_stories(start_epoch, end_epoch)
+		else:
+			top_stories = get_top_stories(start_epoch, end_epoch)
+		
 		top_stories = trim_stories(top_stories,20)
 		day_link, week_link, month_link, year_link = get_date_links()
 
@@ -261,7 +269,7 @@ def stories_list(mode, date_start, date_end=0,home=False):
 				}
 
 		if home: 
-			context['page_header'] = "The Last 24-48hrs"
+			context['page_header'] = "The Last 24 Hours"
 			context['back_button'] = date_start
 
 		response = make_response (render_template("stories.html",context=context))
@@ -273,8 +281,7 @@ def stories_list(mode, date_start, date_end=0,home=False):
 # the main page
 @app.route("/")
 def index():
-	#return stories_list("day",str(datetime.date.today()),True)
-	return stories_list("day",format_from_date_time_to_string_short(datetime.datetime.today() - datetime.timedelta(days=1)),format_from_date_time_to_string_short(datetime.datetime.now()),True)
+	return stories_list("day",str(datetime.date.today()),str(datetime.date.today()),True)
 
 if __name__ == "__main__":
 	app.run(debug=True)
