@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="jumbo">
-        <div id="title">
+      <div id="title">
             <h3 id="back_button"><a href="/{{ context.mode }}/{{ context.back_button }}"><</a></h3>
-            <h3 id="title_header">Top Posts from {{ context.page_header }}</h3>
+            <h3 id="title_header">{{ context.page_header }}</h3>
             {% if context.forward_button %}
                 <h3 id="forward_button"><a href="/{{ context.mode }}/{{ context.forward_button }}">></a></h3>
             {% endif %}
